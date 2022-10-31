@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  *
  * @author riteesh
  */
-class Encounter {
+public class Encounter {
   Double sysBP;
     LocalDateTime entryDateTime;
 

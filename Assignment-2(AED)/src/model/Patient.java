@@ -29,7 +29,9 @@ public class Patient extends Person {
     private String dob;
     private int age;
     
-    
+    public Patient(){
+        
+    }
     public Patient(int patientId, String name, String dob, String house, String community, String city, int zipCode) throws ParseException{
         this.community = new Community();
         this.patientId = patientId;

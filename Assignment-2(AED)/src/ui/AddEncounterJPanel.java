@@ -3,7 +3,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JPanel.java to edit this template
  */
 package ui;
-
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Map;
+import javax.swing.JOptionPane;
+import model.Community;
+import model.Encounter;
+import model.Patient;
 /**
  *
  * @author riteesh
@@ -145,9 +151,32 @@ public class AddEncounterJPanel extends javax.swing.JPanel {
         } else {
             JOptionPane.showMessageDialog(btnSave, "Patient does not exist");
         }
-
+ 
     }//GEN-LAST:event_btnSaveActionPerformed
+        public static boolean isVitalSignAbnormal(Patient p,Encounter vs) {
 
+        Double sysBP = vs.getSysBP();
+        int age = p.getAge();
+//        System.out.println(p.getName()+" "+age);
+        if (age == 0 && (sysBP > 70 || sysBP < 50)) {
+//            System.out.println("Entered 0");
+            return true;
+        } else if ((age > 0 && age <= 12) && (sysBP < 70 || sysBP > 100)) {
+//            System.out.println("Entered 1");
+            return true;
+        } else if ((age > 12 && age <= 60) && (sysBP < 80 || sysBP > 110)) {
+//            System.out.println("Entered 1-5");
+            return true;
+        } else if ((age > 60 && age <= 144) && (sysBP < 80 || sysBP > 120)) {
+//            System.out.println("Entered 6-12");
+            return true;
+        } else if ((age > 144) && (sysBP < 110 || sysBP > 120)) {
+//            System.out.println("Entered 13+");
+            return true;
+        }
+//        System.out.println("Not Entered");
+        return false;
+        }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSave;

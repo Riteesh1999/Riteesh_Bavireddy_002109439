@@ -4,7 +4,19 @@
  */
 package ui;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Map;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import model.Community;
+import model.Encounter;
+import model.Patient;
 
 /**
  *
@@ -17,8 +29,57 @@ public class AddPatientJPanel extends javax.swing.JPanel {
      */
     public AddPatientJPanel() {
         initComponents();
+        txtPatientId.setName("PatientId");
+        txtName.setName("Name");
+        txtDob.setName("Dob");
+        txtHouse.setName("House");
+        txtCommunity.setName("Community");
+        txtCity.setName("City");
+        txtZip.setName("Zip");
     }
+ public boolean validateData(JComponent input) {
+        String name = input.getName();
+        String errorMsg = "";
+        boolean raiseError = false;
+        String text = ((JTextField) input).getText().trim();
+        if (text == null || text.isEmpty()) {
+            raiseError = true;
+            errorMsg = String.format("Please enter a value. The value for %s cannot be empty", name);
 
+        } else {
+            switch (name) {
+                case "Name":
+                case "House":
+                case "City":
+                case "Community":
+                    if (!text.matches("^[a-zA-Z0-9 ]+$")) {
+                        raiseError = true;
+                        errorMsg = String.format("Please enter a valid %s", name);
+                    }
+                    break;
+                case "Dob":
+                    if (!text.matches("^([0-2][0-9]||3[0-1])/(0[0-9]||1[0-2])/([0-9][0-9])?[0-9][0-9]$")) {
+                        raiseError = true;
+                        errorMsg = String.format("Please enter a valid %s with the format DD/MM/YYYY", name);
+                    }
+                    break;
+                case "PatientId":
+                case "Zip":
+                    if (!text.matches("^[0-9]+")) {
+                        raiseError = true;
+                        errorMsg = String.format("Please enter a valid %s", name);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (raiseError) {
+            JOptionPane.showMessageDialog(this, errorMsg);
+            return false;
+        }
+        return true;
+    } 
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

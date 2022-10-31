@@ -4,6 +4,36 @@
  */
 package ui;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import model.Community;
+import model.Encounter;
+import model.Patient;
+import static ui.AddEncounterJPanel.isVitalSignAbnormal;
+
 /**
  *
  * @author riteesh
@@ -15,8 +45,58 @@ public class ManageDetailsJPanel extends javax.swing.JPanel {
      */
     public ManageDetailsJPanel() {
         initComponents();
+        populatePatientTable(Patient.getEncounterHistory());
+        txtPatientId.setName("PatientId");
+        txtName.setName("Name");
+        txtDob.setName("Dob");
+        txtHouse.setName("House");
+        txtCommunity.setName("Community");
+        txtCity.setName("City");
+        txtZip.setName("Zip");
     }
+ public boolean validateData(JComponent input) {
+        String name = input.getName();
+        String errorMsg = "";
+        boolean raiseError = false;
+        String text = ((JTextField) input).getText().trim();
+        if (text == null || text.isEmpty()) {
+            raiseError = true;
+            errorMsg = String.format("Please enter a value. The value for %s cannot be empty", name);
 
+        } else {
+            switch (name) {
+                case "Name":
+                case "House":
+                case "City":
+                case "Community":
+                    if (!text.matches("^[a-zA-Z0-9 ]+$")) {
+                        raiseError = true;
+                        errorMsg = String.format("Please enter a valid %s", name);
+                    }
+                    break;
+                case "Dob":
+                    if (!text.matches("^([0-2][0-9]||3[0-1])/(0[0-9]||1[0-2])/([0-9][0-9])?[0-9][0-9]$")) {
+                        raiseError = true;
+                        errorMsg = String.format("Please enter a valid %s with the format DD/MM/YYYY", name);
+                    }
+                    break;
+                case "PatientId":
+                case "Zip":
+                    if (!text.matches("^[0-9]+")) {
+                        raiseError = true;
+                        errorMsg = String.format("Please enter a valid %s", name);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (raiseError) {
+            JOptionPane.showMessageDialog(this, errorMsg);
+            return false;
+        }
+        return true;
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -281,7 +361,18 @@ public class ManageDetailsJPanel extends javax.swing.JPanel {
 
         }
     }//GEN-LAST:event_btnViewActionPerformed
+private static Patient CreatePatient(String[] metadata) throws Exception
+    {
+        int patientId = Integer.parseInt(metadata[0]);
+        String name = metadata[1];
+        String dob = metadata[2];
+        String house = metadata[3];
+        String community = metadata[4];
+        String city = metadata[5];
+        int zipCode = Integer.parseInt(metadata[6]);
 
+        return new Patient(patientId,name,dob,house,community,city,zipCode);
+    }
     private void btnAddCsvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddCsvActionPerformed
         // TODO add your handling code here:
         JFileChooser browse = new JFileChooser();
@@ -477,4 +568,34 @@ public class ManageDetailsJPanel extends javax.swing.JPanel {
     private javax.swing.JTextField txtSystolicBp;
     private javax.swing.JTextField txtZip;
     // End of variables declaration//GEN-END:variables
+
+   private void populatePatientTable(Map<Patient,ArrayList<Encounter>> map) {
+        DefaultTableModel dtm = (DefaultTableModel) tblPatientDetails.getModel();
+        dtm.setRowCount(0);
+        
+        for(Patient p : map.keySet()){
+            Object row[] = new Object[10];
+            row[0] = p;
+            row[1] = p.getName();
+            row[2] = p.getDob();
+            row[3] = p.getCommunity().getHouse();
+            row[4] = p.getCommunity().getCommunity();
+            row[5] = p.getCommunity().getCity();
+            row[6] = p.getCommunity().getZipCode();
+            if(map.get(p).size()>0){
+                row[7] = map.get(p).get(map.get(p).size()-1).getSysBP() ;
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+                String formattedDate = formatter.format(map.get(p).get(map.get(p).size()-1).getEntryDateTime());
+                row[8] = formattedDate ;
+                row[9] = p.isAbnormal() ? "Abnormal" : "Normal" ;
+            }else{
+                row[7] = "NA";
+                row[8] = "NA";
+                row[9] = "NA";
+            }
+            
+            dtm.addRow(row);
+        }
+    }
 }
+
